@@ -3,24 +3,31 @@ import axios from "axios";
 import bodyParser from "body-parser";
 const app = express();
 const port = 3000;
+
+app.use(express.static('public', { extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set('view engine', 'ejs'); // Add this line
+
+
+const API_URL = "https://secrets-api.appbrewery.com";
+
 // Making a GET request using axios
 app.get("/", async (req, res) => {
     try {
-      // Make the GET request using Axios
-      const response = await axios.get(`${API_URL}/your-endpoint`);
-      const data = response.data; // Assuming the API returns JSON data
-  
-      // Use the fetched data here
-      res.json(data); // Send the data as a JSON response
+      const response = await axios.get(API_URL+"/random");
+      const result = response.data;
+      console.log(result);
+      res.render("index.ejs", { secret: result.secret, user: result.username });
     } catch (error) {
-      // Handle errors here
-      console.error('Error fetching data:', error);
-      res.status(500).json({ error: 'Error fetching data' }); // Send an error response
+      console.error("Failed to make request:", error.message);
+      res.render("index.ejs", {
+        error: error.message,
+      });
     }
   });
   
   app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`App listening on port ${port}`);
   });
 
 
